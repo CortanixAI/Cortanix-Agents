@@ -1,0 +1,60 @@
+/**
+ * Schema for a token analysis experiment configuration and results.
+ */
+
+export type ExperimentStatus = "draft" | "running" | "completed" | "failed"
+
+export interface ExperimentParameters {
+  tokenSymbol: string
+  analysisWindowMinutes: number
+  volatilityThreshold: number
+}
+
+export interface ExperimentResult {
+  volatility: number
+  averagePrice: number
+  patternsDetected: number
+  depthMetrics?: Record<string, unknown>
+  timestamp: number
+}
+
+export interface Experiment {
+  experimentId: string
+  createdAt: string
+  description: string
+  parameters: ExperimentParameters
+  status: ExperimentStatus
+  results: ExperimentResult | null
+  notes: string
+}
+
+export function createDraftExperiment(tokenSymbol: string): Experiment {
+  return {
+    experimentId: crypto.randomUUID(),
+    createdAt: new Date().toISOString(),
+    description: "",
+    parameters: {
+      tokenSymbol,
+      analysisWindowMinutes: 0,
+      volatilityThreshold: 0,
+    },
+    status: "draft",
+    results: null,
+    notes: "",
+  }
+}
+
+export function updateExperimentStatus(
+  exp: Experiment,
+  status: ExperimentStatus,
+  notes?: string
+): Experiment {
+  return { ...exp, status, notes: notes ?? exp.notes }
+}
+
+export function attachResults(
+  exp: Experiment,
+  results: ExperimentResult
+): Experiment {
+  return { ...exp, status: "completed", results }
+}

@@ -1,0 +1,59 @@
+/**
+ * Project configuration schema and helpers.
+ */
+
+export type LogLevel = "debug" | "info" | "warn" | "error"
+
+export interface LoggingConfig {
+  level: LogLevel
+  destinations: Array<"console" | "file" | "remote">
+  filePath?: string
+  remoteUrl?: string
+}
+
+export interface FeatureFlags {
+  enableDiagnostics: boolean
+  enableRealTimeAlerts: boolean
+  enableCaching?: boolean
+  enableMetrics?: boolean
+}
+
+export interface ProjectConfig {
+  projectName: string
+  environment: "development" | "staging" | "production"
+  logging: LoggingConfig
+  features: FeatureFlags
+}
+
+export const defaultConfig: ProjectConfig = {
+  projectName: "CoreApp",
+  environment: "development",
+  logging: {
+    level: "info",
+    destinations: ["console"],
+  },
+  features: {
+    enableDiagnostics: false,
+    enableRealTimeAlerts: false,
+    enableCaching: true,
+    enableMetrics: true,
+  },
+}
+
+export function loadConfig(overrides: Partial<ProjectConfig>): ProjectConfig {
+  return {
+    ...defaultConfig,
+    ...overrides,
+    logging: { ...defaultConfig.logging, ...overrides.logging },
+    features: { ...defaultConfig.features, ...overrides.features },
+  }
+}
+
+export function isProduction(cfg: ProjectConfig): boolean {
+  return cfg.environment === "production"
+}
+
+export function shouldLog(cfg: ProjectConfig, level: LogLevel): boolean {
+  const order: LogLevel[] = ["debug", "info", "warn", "error"]
+  return order.indexOf(level) >= order.indexOf(cfg.logging.level)
+}
